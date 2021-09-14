@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: charles <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/07/28 20:56:13 by charles           #+#    #+#             */
-/*   Updated: 2021/07/28 20:56:15 by charles          ###   ########.fr       */
+/*   Created: 2021/08/31 16:47:11 by charles           #+#    #+#             */
+/*   Updated: 2021/08/31 16:47:14 by charles          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "minitalk_bonus.h"
 
 void	sig_handler(int sig, siginfo_t *siginfo, void *oldact)
 {

@@ -17,7 +17,11 @@ void	connection_terminated(pid_t server_pid)
 	static int	i = 8;
 
 	if (i--)
-		kill(server_pid, SIGUSR2);
+	{
+		if (kill(server_pid, SIGUSR2) == -1)
+			exit_error("Unexpected error");
+		usleep(100);
+	}
 	if (!i)
 	{
 		ft_putstr_fd("\nTransmission done\n", STDIN_FILENO);
@@ -69,9 +73,11 @@ int	main(int argc, char **argv)
 {
 	struct sigaction	sa;
 
-	if (argc != 3 || ft_strlen(argv[1]) > 7 || !ft_strlen(argv[2])
+	if (argc != 3 || ft_strlen(argv[1]) > 7
 		|| ft_atoi(argv[1]) <= 0 || ft_atoi(argv[1]) > 4194303)
 		exit_error("Usage : ./client [0 < Server PID < 4194304] [Message]\n");
+	if (!ft_strlen(argv[2]))
+		return (0);
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = sig_handler;
 	sigaction(SIGUSR1, &sa, NULL);
