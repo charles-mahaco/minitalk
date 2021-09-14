@@ -17,7 +17,11 @@ void	connection_terminated(pid_t server_pid)
 	static int	i = 8;
 
 	if (i--)
-		kill(server_pid, SIGUSR2);
+	{
+		usleep(50);
+		if (kill(server_pid, SIGUSR2) == -1)
+			exit_error("Unexpected error");
+	}
 	if (!i)
 	{
 		ft_putstr_fd("\nTransmission done\n", STDIN_FILENO);
@@ -31,11 +35,13 @@ void	bit_sender(char *message, pid_t pid)
 	static unsigned char	c;
 	static char				*str;
 	static int				server_rep = 0;
+	static pid_t			server_pid;
 
 	if (message)
 	{
 		str = message;
 		c = *str;
+		server_pid = pid;
 	}
 	if (i == 7)
 	{
@@ -43,11 +49,11 @@ void	bit_sender(char *message, pid_t pid)
 		c = *(++str);
 	}
 	if (c && c << ++i & 0x80)
-		server_rep = kill(pid, SIGUSR1);
+		server_rep = kill(server_pid, SIGUSR1);
 	else if (c)
-		server_rep = kill(pid, SIGUSR2);
+		server_rep = kill(server_pid, SIGUSR2);
 	else
-		connection_terminated(pid);
+		connection_terminated(server_pid);
 	if (server_rep == -1)
 		exit_error("Server not found\n");
 }
@@ -69,9 +75,11 @@ int	main(int argc, char **argv)
 {
 	struct sigaction	sa;
 
-	if (argc != 3 || ft_strlen(argv[1]) > 7 || !ft_strlen(argv[2])
+	if (argc != 3 || ft_strlen(argv[1]) > 7
 		|| ft_atoi(argv[1]) <= 0 || ft_atoi(argv[1]) > 4194303)
 		exit_error("Usage : ./client [0 < Server PID < 4194304] [Message]\n");
+	if (!ft_strlen(argv[2]))
+		return (0);
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = sig_handler;
 	sigaction(SIGUSR1, &sa, NULL);

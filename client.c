@@ -18,9 +18,9 @@ void	connection_terminated(pid_t server_pid)
 
 	if (i--)
 	{
+		usleep(50);
 		if (kill(server_pid, SIGUSR2) == -1)
 			exit_error("Unexpected error");
-		usleep(100);
 	}
 	if (!i)
 	{
@@ -35,11 +35,13 @@ void	bit_sender(char *message, pid_t pid)
 	static unsigned char	c;
 	static char				*str;
 	static int				server_rep = 0;
+	static pid_t			server_pid;
 
 	if (message)
 	{
 		str = message;
 		c = *str;
+		server_pid = pid;
 	}
 	if (i == 7)
 	{
@@ -47,11 +49,11 @@ void	bit_sender(char *message, pid_t pid)
 		c = *(++str);
 	}
 	if (c && c << ++i & 0x80)
-		server_rep = kill(pid, SIGUSR1);
+		server_rep = kill(server_pid, SIGUSR1);
 	else if (c)
-		server_rep = kill(pid, SIGUSR2);
+		server_rep = kill(server_pid, SIGUSR2);
 	else
-		connection_terminated(pid);
+		connection_terminated(server_pid);
 	if (server_rep == -1)
 		exit_error("Server not found\n");
 }

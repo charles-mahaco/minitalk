@@ -16,22 +16,28 @@ void	sig_handler(int sig, siginfo_t *siginfo, void *oldact)
 {
 	static char		c = 0X00;
 	static int		bit_count = 0;
+	static pid_t	client_pid = 0;
 
 	(void)oldact;
+	if (!client_pid)
+		client_pid = siginfo->si_pid;
 	c |= sig == SIGUSR1;
 	if (bit_count++ < 7)
 	{
 		c = c << 1;
-		kill(siginfo->si_pid, SIGUSR2);
+		kill(client_pid, SIGUSR2);
 	}
 	else
 	{
 		bit_count = 0;
 		if (c == 0x00)
+		{
+			client_pid = 0;
 			return ;
+		}
 		write(STDIN_FILENO, &c, 1);
 		c = 0x00;
-		kill(siginfo->si_pid, SIGUSR1);
+		kill(client_pid, SIGUSR1);
 	}
 }
 
@@ -44,9 +50,6 @@ int	main(void)
 	ft_putstr_fd("]\n", STDIN_FILENO);
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = sig_handler;
-	sigemptyset(&sa.sa_mask);
-	sigaddset(&sa.sa_mask, SIGUSR1);
-	sigaddset(&sa.sa_mask, SIGUSR2);
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 	while (19)
